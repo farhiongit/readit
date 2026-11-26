@@ -1,0 +1,54 @@
+#ifndef __GENERIC_STREAM_READER_H__
+#define __GENERIC_STREAM_READER_H__
+
+#include <stddef.h>
+
+typedef void (*free_prototype) (void *);
+typedef struct {
+  void *instance;                    // Pointer to the concrete structure (FILE*, string, etc.)
+  free_prototype free_instance_fn;   // Optional deallocator to free memory allocated by the reader to make the instance.
+  void *(*read_fn) (void *instance); // Function to read the next character from the instance (or 0 in the event of an end-of-stream or error.)
+  free_prototype forget_read_fn;     // Optional character deallocator to free memory allocated by read_fn.
+} reader;
+
+typedef struct stream_reader stream_reader;
+
+// Create a stream for reading.
+__attribute__ ((warn_unused_result))
+stream_reader *
+stream_create (reader reader);
+
+// Destroy a stream.
+void stream_destroy (stream_reader *stream);
+
+// Read the next character from the stream.
+// Returns:
+// - 0 if the end of the stream is reached or an error occurs;
+// - errno is set if an error occurs while reading from the stream via stream->read_fn;
+// - otherwise, a pointer to the next character from the stream, consuming it.
+__attribute__ ((warn_unused_result)) void *stream_get (stream_reader *stream);
+
+// Look-ahead by n characters.
+// Returns:
+// - 0 if the end of the stream is reached or an error occurs;
+// - errno = ENOMEM in the event of a memory allocation error;
+// - errno is set if an error occurs while reading from the stream via stream->read_fn;
+// - otherwise, a pointer to the nth (n > 0) subsequent character, without consuming it from the stream.
+void *stream_look_ahead (stream_reader *stream, size_t n);
+
+// Returns the function forget_fn of the reader associated to the stream.
+// This returned function must be applied to the result of a call to stream_get to avoid memory leaks.
+free_prototype stream_forgetter (stream_reader *stream);
+
+// Discards the next character from the stream (applies, if defined, forget_read_fn to the next character).
+void stream_forget (stream_reader *stream);
+//================== HELPERS  for stream_create ======================
+#include <stdio.h>
+#include <wchar.h>
+
+reader ch_file_reader (FILE *f);
+reader wc_file_reader (FILE *f);
+reader str_reader (char *source_str);
+reader wcs_reader (wchar_t *source_str);
+
+#endif

@@ -19,29 +19,29 @@ The [interface](genericstreamreader.h) permits:
 
 `stream_create` requires a `reader`, user-defined or provided, composed of:
 
-  Field |Description
-  - | -
-  `void *instance`     | Pointer to the concrete structure (FILE*, string, etc.) to read.
-  `free_instance_fn`   | Optional function to free memory allocated by the instance.
-  `read_fn`            | Function to read the next character from the instance (or 0 in the event of an end-of-stream or error.)
-  `forget_read_fn`     | Optional function to free memory allocated by read_fn.
+| Field | Description |
+| - | - |
+| `void *instance`     | Pointer to the concrete structure (FILE*, string, etc.) to read. |
+| `free_instance_fn`   | Optional function to free memory allocated by the instance. |
+| `read_fn`            | Function to read the next character from the instance (or 0 in the event of an end-of-stream or error.) |
+| `forget_read_fn`     | Optional function to free memory allocated by read_fn. |
 
 Provided predefined readers are:
 
-  Reader | Description
-  - | -
-  `ch_file_reader` | To read characters `char` from a file `FILE *`.
-  `wc_file_reader` | To read wide characters `wchar_t` from a file `FILE *`.
-  `str_reader`     | To read characters `char` from a string `char *`.
-  `wcs_reader`     | To read wide characters `wchar_t` from a string `wchar_t *`.
+| Reader | Description |
+| - | - |
+| `ch_file_reader` | To read characters `char` from a file `FILE *`. |
+| `wc_file_reader` | To read wide characters `wchar_t` from a file `FILE *`. |
+| `str_reader`     | To read characters `char` from a string `char *`. |
+| `wcs_reader`     | To read wide characters `wchar_t` from a string `wchar_t *`. |
 
 ## Files
 
-File | Description
-- | -
-[`genericstreamreader.h`](genericstreamreader.h) | Interface
-[`genericstreamreader.c`](genericstreamreader.c) | Implementation
-[`test_streamreader.c`](test_streamreader.c)     | Tests and examples (type [`make`](Makefile))
+| File | Description |
+| - | - |
+| [`genericstreamreader.h`](genericstreamreader.h) | Interface |
+| [`genericstreamreader.c`](genericstreamreader.c) | Implementation |
+| [`test_streamreader.c`](test_streamreader.c)     | Tests and examples (type [`make`](Makefile)) |
 
 # Generic iterator
 
@@ -49,23 +49,23 @@ File | Description
 
 The user provides a user-defined or predefined `iterator` composed of:
 
-  Field |Description
-  - | -
-  `void *instance`     | Pointer to the concrete structure (FILE*, string, etc.) to iterate on.
-  `free_instance_fn`   | Optional function to free memory allocated by the instance.
-  `first_elem_fn`      | Optional function to get the first element from the instance (or 0 if none.). `next_elem_fn` is used by default.
-  `next_elem_fn`       | Function to get the next element from the instance (or 0 if none.)
-  `free_elem_fn`       | Optional function to free memory allocated by an element.
+| Field | Description |
+| - | - |
+| `void *instance`     | Pointer to the concrete structure (FILE*, string, etc.) to iterate on. |
+| `free_instance_fn`   | Optional function to free memory allocated by the instance. |
+| `first_elem_fn`      | Optional function to get the first element from the instance (or 0 if none.). `next_elem_fn` is used by default. |
+| `next_elem_fn`       | Function to get the next element from the instance (or 0 if none.) |
+| `free_elem_fn`       | Optional function to free memory allocated by an element. |
 
 Provided predefined iterators are:
 
-  Reader | Description
-  - | -
-  `ch_file_iterator` | To iterate on characters `char` from a file `FILE *`;
-  `wc_file_iterator` | To iterate on wide characters `wchar_t` from a file `FILE *`;
-  `str_iterator`     | To iterate on a string `char *`;
-  `wcs_iterator`     | To iterate on a wide characters string `wchar_t *`;
-  `array_iterator`   | To iterate on elements of an array.
+| Reader | Description |
+| - | - |
+| `ch_file_iterator` | To iterate on characters `char` from a file `FILE *` |
+| `wc_file_iterator` | To iterate on wide characters `wchar_t` from a file `FILE *` |
+| `str_iterator`     | To iterate on a string `char *` |
+| `wcs_iterator`     | To iterate on a wide characters string `wchar_t *` |
+| `array_iterator`   | To iterate on elements of an array. |
 
 ## Iteration
 
@@ -78,9 +78,9 @@ Once the [iterator](#iterators) is defined, its components are used to iterate o
 
 ## Files
 
-File | Description
-- | -
-[`genericiter.h`](genericiter.h) | Interface
-[`genericiter.c`](genericiter.c) | Implementation
-[`test_iter.c`](test_iter.c)     | Tests and examples (type [`make`](Makefile))
+| File | Description |
+| - | - |
+| [`genericiter.h`](genericiter.h) | Interface |
+| [`genericiter.c`](genericiter.c) | Implementation |
+| [`test_iter.c`](test_iter.c)     | Tests and examples (type [`make`](Makefile)) |
 

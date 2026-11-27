@@ -34,7 +34,7 @@ lower (void *elem, void *arg) {
     void (*f) (char *) = arg;
     f (c);
   }
-  return 1;
+  return *c != '/';
 }
 
 static void
@@ -57,6 +57,21 @@ ll_begin (void *instance) { return ((struct ll_iter *)instance)->current = ((str
 static void *
 ll_next (void *instance) { return ((struct ll_iter *)instance)->current = ((struct ll_iter *)instance)->current->next; }
 
+static void *
+A (void *) {
+  static char A = 'A';
+  return &A;
+}
+
+static int
+doA (void *elem, void *arg) {
+  int ret = *(size_t *)arg > 0;
+  fprintf (stderr, "%c_%zu_%i ", *(char *)elem, *(size_t *)arg, ret);
+  if (*(size_t *)arg)
+    (*(size_t *)arg)--;
+  return ret;
+}
+
 int
 main (void) {
   { // Home-made loop in integers
@@ -75,6 +90,7 @@ main (void) {
     for (size_t i = 0; i < sizeof (alphabet) / sizeof (*alphabet); i++)
       fprintf (stderr, "%c", alphabet[i] = (char)('A' + i));
     fprintf (stderr, "\n");
+    assert (iterator_for_each (ARRAY_ITERATOR (alphabet), 0, 0) == sizeof (alphabet) / sizeof (*alphabet)); // No actor
     assert (iterator_for_each (ARRAY_ITERATOR (alphabet), lower, printc) == sizeof (alphabet) / sizeof (*alphabet));
     fprintf (stderr, "\n");
   }
@@ -86,10 +102,12 @@ main (void) {
     fprintf (stderr, "\n");
   }
   { // Loop on a string
-    char s[] = "ITERATE ON YOU!";
+    char s[] = "ITERATE ON YOU!/IGNORED";
     fprintf (stderr, "%s\n", s);
-    assert (iterator_for_each (str_iterator (s), lower, printc) == strlen (s));
+    assert (iterator_for_each (str_iterator (s), 0, 0) == strlen (s)); // No actor
+    assert (iterator_for_each (str_iterator (s), lower, printc) == (strchr (s, '/') ? (size_t)(strchr (s, '/') - s) : strlen (s)));
     fprintf (stderr, "\n");
+    fprintf (stderr, "%s\n", s);
   }
   { // Loop on a linked list.
     struct ll_elem *head = 0;
@@ -110,5 +128,22 @@ main (void) {
       free (e);
     }
     fprintf (stderr, "\n");
+  }
+  { // No instance
+    size_t ten = 3;
+    assert (3 == iterator_for_each ((iterator){ .next_elem_fn = A }, doA, &ten));
+    assert (ten == (size_t)0);
+    fprintf (stderr, "\n");
+  }
+  { // No instance, no next function
+    size_t ten = 3;
+    assert (1 == iterator_for_each ((iterator){ .first_elem_fn = A }, doA, &ten));
+    assert (ten == (size_t)2);
+    fprintf (stderr, "\n");
+  }
+  { // No nothing
+    iterator Zeros = { 0 };
+    assert (0 == iterator_for_each (Zeros, doA, 0));
+    assert (0 == iterator_for_each (Zeros, 0, 0));
   }
 }

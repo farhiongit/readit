@@ -5,11 +5,12 @@
 The [interface](genericstreamreader.h) permits:
 
 - the creation of a `stream_reader` from a provided [reader](#readers) with `stream_create`;
-- reading and consuming the next "character" with `stream_get`;
-- cleaning up the last consumed "character" by applying the function returned by `stream_forgetter` to it.
-- reading ahead[^2] the *n*<sup>th</sup> "character" (*n* > 0) not consumed yet with `stream_look_ahead` (up to 1024[^1] or exhaustion of memory, which comes first);
-- ignoring and consuming[^2] the next "character" with `stream_forget`;
-- closing the stream with `stream_destroy`.
+- to read and consume, with `stream_get`, the next "character";
+- to apply the function returned by `stream_forgetter` to the last "character" consumed by `stream_get` (to avoid memory leaks);
+- to look ahead[^2], with `stream_look_ahead`, the *n*<sup>th</sup> "character" not consumed yet, *without consuming it*
+  (*n* > 0, up to 1024[^1] or exhaustion of memory, which comes first);
+- to ignore and consume[^2], with `stream_forget`, the next "character";
+- to close the stream with `stream_destroy` (to avoid memory leaks).
 
 [^1]: This limit can be modified at compile-time with the macro `MAXIMUM_CAPACITY` (i.e. `-DMAXIMUM_CAPACITY=8`).
 
@@ -72,9 +73,9 @@ Provided predefined iterators are:
 Once the [iterator](#iterators) is defined, its components are used to iterate on data with a call to `iterator_for_each`:
 
 - Its signature is `size_t iterator_for_each (iterator iter, int (*actor) (void *elem, void *arg), void *arg)`;
-- A function `int (*actor) (void *elem, void *arg)` is applied on each character sucessively until this function returns `0`;
+- A function `int (*actor) (void *elem, void *arg)` is applied to each element consecutively until this function `actor` returns `0`;
 - `arg` is passed as second argument to `actor`;
-- It returns the number of elements wich have been iterated on.
+- It returns the number of elements which have been iterated on *before* `actor` returns `0`.
 
 ## Files
 

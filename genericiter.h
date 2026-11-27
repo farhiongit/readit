@@ -13,6 +13,8 @@ typedef struct {
   free_prototype free_elem_fn;             // Optional element deallocator to free memory allocated by next_elem_fn.
 } iterator;
 
+// The function `int (*actor) (void *elem, void *arg)` is applied to each element consecutively until `actor` returns `0`; `arg` is passed as second argument to `actor`.
+// Returns the number of elements which have been iterated on before `actor` returns `0`.
 size_t iterator_for_each (iterator iter, int (*actor) (void *elem, void *arg), void *arg);
 
 /* =========== HELPERS ============ */

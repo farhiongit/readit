@@ -56,7 +56,7 @@ The user provides a user-defined or predefined `iterator` composed of:
 | `free_instance_fn`   | Optional function to free memory allocated by the instance. |
 | `first_elem_fn`      | Optional function to get the first element from the instance (or 0 if none.). `next_elem_fn` is used by default. |
 | `next_elem_fn`       | Function to get the next element from the instance (or 0 if none.) |
-| `free_elem_fn`       | Optional function to free memory allocated by an element. |
+| `free_elem_fn`       | Optional function to free memory allocated by `first_elem_fn` and `next_elem_fn` (when defined). |
 
 Provided predefined iterators are:
 

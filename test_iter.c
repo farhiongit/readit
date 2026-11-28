@@ -27,19 +27,11 @@ if_lt_do (void *elem, void *arg) {
 }
 
 static int
-lower (void *elem, void *arg) {
+lower (void *elem, void *) {
   char *c = elem;
   *c = (char)tolower (*c);
-  if (arg) {
-    void (*f) (char *) = arg;
-    f (c);
-  }
-  return *c != '/';
-}
-
-static void
-printc (char *c) {
   fprintf (stderr, "%c", *c);
+  return *c != '/';
 }
 
 struct ll_elem {
@@ -72,6 +64,31 @@ doA (void *elem, void *arg) {
   return ret;
 }
 
+static int
+printc_until (void *elem, void *arg) {
+  fprintf (stderr, "%c", *(char *)elem);
+  return *(char *)elem != *(char *)arg;
+}
+
+static char *
+make_c (int upper) {
+  char *c = malloc (sizeof (*c));
+  assert (c);
+  *c = (char)((upper ? 'A' : 'a') + random () % 26);
+  return c;
+}
+
+static void *
+make_U (void *) { return make_c (1); }
+
+static void *
+make_l (void *) { return make_c (0); }
+
+static void
+done (void *) {
+  fprintf (stderr, "\nDone.");
+}
+
 int
 main (void) {
   { // Home-made loop in integers
@@ -91,13 +108,13 @@ main (void) {
       fprintf (stderr, "%c", alphabet[i] = (char)('A' + i));
     fprintf (stderr, "\n");
     assert (iterator_for_each (ARRAY_ITERATOR (alphabet), 0, 0) == sizeof (alphabet) / sizeof (*alphabet)); // No actor
-    assert (iterator_for_each (ARRAY_ITERATOR (alphabet), lower, printc) == sizeof (alphabet) / sizeof (*alphabet));
+    assert (iterator_for_each (ARRAY_ITERATOR (alphabet), lower, 0) == sizeof (alphabet) / sizeof (*alphabet));
     fprintf (stderr, "\n");
   }
   { // Loop on a FILE
     char *const s = "ITERATE ON ME!";
     FILE *f = fmemopen (s, strlen (s), "r");
-    assert (iterator_for_each (ch_file_iterator (f), lower, printc) == strlen (s));
+    assert (iterator_for_each (ch_file_iterator (f), lower, 0) == strlen (s));
     fclose (f);
     fprintf (stderr, "\n");
   }
@@ -105,7 +122,7 @@ main (void) {
     char s[] = "ITERATE ON YOU!/IGNORED";
     fprintf (stderr, "%s\n", s);
     assert (iterator_for_each (str_iterator (s), 0, 0) == strlen (s)); // No actor
-    assert (iterator_for_each (str_iterator (s), lower, printc) == (strchr (s, '/') ? (size_t)(strchr (s, '/') - s) : strlen (s)));
+    assert (iterator_for_each (str_iterator (s), lower, 0) == (strchr (s, '/') ? (size_t)(strchr (s, '/') - s) : strlen (s)));
     fprintf (stderr, "\n");
     fprintf (stderr, "%s\n", s);
   }
@@ -120,7 +137,7 @@ main (void) {
     }
     fprintf (stderr, "\n");
 
-    assert (10 == iterator_for_each ((iterator){ .instance = &((struct ll_iter){ .list = head }), .first_elem_fn = ll_begin, .next_elem_fn = ll_next }, lower, printc));
+    assert (10 == iterator_for_each ((iterator){ .instance = &((struct ll_iter){ .list = head }), .first_elem_fn = ll_begin, .next_elem_fn = ll_next }, lower, 0));
 
     struct ll_elem *n;
     for (struct ll_elem *e = head; e; e = n) {
@@ -145,5 +162,12 @@ main (void) {
     iterator Zeros = { 0 };
     assert (0 == iterator_for_each (Zeros, doA, 0));
     assert (0 == iterator_for_each (Zeros, 0, 0));
+  }
+  { // All functions used
+    iterator it = { .first_elem_fn = make_U, .next_elem_fn = make_l, .after_each_fn = free, .after_all_fn = done };
+    iterator_for_each (it, printc_until, &(char){ 'z' });
+    fprintf (stderr, "\n");
+    iterator_for_each (it, printc_until, &(char){ 'y' });
+    fprintf (stderr, "\n");
   }
 }

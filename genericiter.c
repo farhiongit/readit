@@ -13,13 +13,13 @@ iterator_for_each (iterator g, int (*actor) (void *elem, void *arg), void *arg) 
        elem = g.next_elem_fn ? g.next_elem_fn (g.instance) : 0) {
     if ((go = actor ? actor (elem, arg) : 1))
       ret++;
-    if (g.free_elem_fn)
-      g.free_elem_fn (elem);
+    if (g.after_each_fn)
+      g.after_each_fn (elem);
     if (!go)
       break;
   }
-  if (g.free_instance_fn)
-    g.free_instance_fn (g.instance);
+  if (g.after_all_fn)
+    g.after_all_fn (g.instance);
   return ret;
 }
 
@@ -37,7 +37,7 @@ next_char (void *instance) {
 }
 
 iterator
-ch_file_iterator (FILE *f) { return ((iterator){ .instance = f, .next_elem_fn = next_char, .free_elem_fn = free }); }
+ch_file_iterator (FILE *f) { return ((iterator){ .instance = f, .next_elem_fn = next_char, .after_each_fn = free }); }
 
 static void *
 next_wc (void *instance) {
@@ -52,7 +52,7 @@ next_wc (void *instance) {
 }
 
 iterator
-wc_file_iterator (FILE *f) { return (iterator){ .instance = f, .next_elem_fn = next_wc, .free_elem_fn = free }; }
+wc_file_iterator (FILE *f) { return (iterator){ .instance = f, .next_elem_fn = next_wc, .after_each_fn = free }; }
 
 struct array {
   void *array;
@@ -82,7 +82,7 @@ array_iterator (void *array, size_t length, size_t elem_size) {
   struct array *instance = malloc (sizeof (*instance));
   if (instance)
     *instance = (struct array){ .array = array, .length = length, .size = elem_size };
-  return (iterator){ .instance = instance, .first_elem_fn = first_elem, .next_elem_fn = next_elem, .free_instance_fn = free };
+  return (iterator){ .instance = instance, .first_elem_fn = first_elem, .next_elem_fn = next_elem, .after_all_fn = free };
 }
 
 struct string {
@@ -108,7 +108,7 @@ str_iterator (char *source_str) {
     ctx->str = source_str;
     ctx->cursor = 0;
   }
-  return (iterator){ .instance = ctx, .next_elem_fn = str_iterator_adapter, .free_instance_fn = free };
+  return (iterator){ .instance = ctx, .next_elem_fn = str_iterator_adapter, .after_all_fn = free };
 }
 
 static void *
@@ -129,5 +129,5 @@ wcs_iterator (wchar_t *source_str) {
     ctx->str = source_str;
     ctx->cursor = 0;
   }
-  return (iterator){ .instance = ctx, .next_elem_fn = wcs_iterator_adapter, .free_instance_fn = free };
+  return (iterator){ .instance = ctx, .next_elem_fn = wcs_iterator_adapter, .after_all_fn = free };
 }
